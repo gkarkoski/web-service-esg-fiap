@@ -1,0 +1,53 @@
+# .NET: build, restore and publish output
+**/bin/
+**/obj/
+**/publish/
+artifacts/
+
+# IDE settings and user-specific files
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# Test results and coverage reports
+**/TestResults/
+coverage/
+coverage-report/
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
+coverage.opencover.xml
+
+# Local configuration and secrets (never put real secrets in tracked settings)
+.env
+.env.*
+!.env.example
+!.env.sample
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+**/secrets.json
+*.pfx
+*.p12
+*.key
+wallet/
+Wallet_*/
+
+# Logs, temporary files and delivery archives
+*.log
+logs/
+*.tmp
+*.bak
+*.zip
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Keep appsettings.json (placeholders/demo only), appsettings.Example.json,
+# EF Core migrations, Dockerfile, .dockerignore, sources, tests and collections tracked.
