@@ -55,7 +55,11 @@ var app = builder.Build();
 app.Services.GetRequiredService<JwtSettings>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
-if (app.Environment.IsDevelopment()) { app.UseSwagger(); app.UseSwaggerUI(); }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(o => o.SwaggerEndpoint("v1/swagger.json", "ESG Training Management API v1"));
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

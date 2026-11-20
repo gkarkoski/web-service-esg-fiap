@@ -54,6 +54,9 @@ public class CollectionWorkflowTests
         var response = await client.GetAsync("/swagger/v1/swagger.json");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Matches(@"^3\.\d+\.\d+$", json.GetProperty("openapi").GetString()!);
+        var ui = await client.GetStringAsync("/swagger/index.js");
+        Assert.Contains("v1/swagger.json", ui);
         var paths = json.GetProperty("paths");
         foreach (var path in new[] { "/api/auth/login", "/api/employees", "/api/trainings", "/api/job-roles", "/api/training-records", "/api/compliance/issues" })
             Assert.True(paths.TryGetProperty(path, out _));
