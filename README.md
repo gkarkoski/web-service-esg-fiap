@@ -25,11 +25,10 @@ The command examples use PowerShell 7 (`pwsh`). Choose either local .NET executi
 
 Install the .NET 8 SDK, including the ASP.NET Core 8 runtime. A newer SDK can build net8.0, but API execution and HTTP tests still need ASP.NET Core 8. Oracle SQL generation targets Oracle 19 compatibility, with NUMBER(1) booleans. Use Oracle 19c or newer and permissions to create tables, indexes, constraints and identity columns.
 
-Supply Oracle credentials and the JWT key through environment variables. appsettings.Example.json contains placeholders only. PowerShell example:
+Supply Oracle credentials through environment variables to use the database-backed endpoints. appsettings.Example.json shows the configuration format.
 
 ```powershell
 $env:ConnectionStrings__DefaultConnection = 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;'
-$env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 dotnet tool restore
 dotnet restore web-service-esg-fiap.sln
@@ -37,7 +36,7 @@ dotnet build web-service-esg-fiap.sln --no-restore
 dotnet run --project src/EsgTrainingManagement.Api -- --urls http://localhost:8080
 ```
 
-Replace Oracle placeholders locally. Keep actual credentials outside tracked files and ZIPs. The JWT key requires at least 32 bytes; tokens expire after 60 minutes. Issuer and audience default to EsgTrainingManagement. Changing the key invalidates previous tokens.
+Replace Oracle placeholders locally. Keep actual credentials outside tracked files and ZIPs. The API starts with a random in-memory JWT signing key when `Jwt:SigningKey` is empty or omitted. Sign in again after restarting the API. To keep tokens valid across restarts or instances, configure the same private key of at least 32 bytes through `Jwt__SigningKey` or user-secrets. The default token lifetime configured in appsettings.json is 180 minutes.
 
 The evaluator needs valid Oracle credentials and network access to the FIAP server. They can use their own schema with the required permissions, or receive access to the demonstration schema privately. The Oracle schema normally matches the database username. API demonstration logins do not grant direct database access. The application does not load credentials from AGENTS.md, and the delivery does not include database passwords.
 
@@ -45,14 +44,12 @@ For repeated local execution from Rider, configure .NET user-secrets once instea
 
 ```powershell
 dotnet user-secrets set 'ConnectionStrings:DefaultConnection' 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;' --project src/EsgTrainingManagement.Api
-$jwtKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
-dotnet user-secrets set 'Jwt:SigningKey' $jwtKey --project src/EsgTrainingManagement.Api
 dotnet run --project src/EsgTrainingManagement.Api --launch-profile http
 ```
 
 Replace placeholders locally. In Rider, select the `http` launch profile from launchSettings.json, which sets Development and port 8080. User-secrets are loaded only in Development; running the executable directly without that environment does not load them. Docker and other machines still need their own configuration. Environment variables override user-secrets when both are set.
 
-Outside Testing, a configured connection triggers MigrateAsync followed by the idempotent seed. Connection or migration errors fail startup. Without a connection, startup logs that the database was not initialized; database-backed routes require configuration. An absent or invalid signing key fails startup.
+Outside Testing, a configured connection triggers MigrateAsync followed by the idempotent seed. Connection or migration errors fail startup. Without a connection, the API starts and logs that the database was not initialized. Database-backed routes require an Oracle connection.
 
 Swagger is available at [http://localhost:8080/swagger](http://localhost:8080/swagger) in Development. Log in through POST /api/auth/login and enter the returned token in Authorize. Public demonstration accounts configured in appsettings.json:
 
@@ -155,16 +152,15 @@ Prerequisites:
 - Have valid Oracle credentials and network access to oracle.fiap.com.br:1521 from the container, including any institution-required VPN.
 - Keep host port 8080 available. No local .NET SDK or Oracle installation is required for this option.
 
-Configure the environment in that same terminal, build the image, and start the API:
+Configure the environment in that same terminal, build the image, and start the API.
 
 ```powershell
 $env:ConnectionStrings__DefaultConnection = 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;'
-$env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
 docker build -t esg-training-management .
-docker run --rm -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development -e ConnectionStrings__DefaultConnection -e Jwt__SigningKey esg-training-management
+docker run --rm -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development -e ConnectionStrings__DefaultConnection esg-training-management
 ```
 
-Set the two environment variables in the shell first. The container connects to an external Oracle server. Development is selected only in the local demonstration command; the container defaults to Production with Swagger disabled. The Dockerfile uses a multi-stage build and a non-root runtime user.
+The container connects to an external Oracle server using the connection string from the shell. Pass `-e Jwt__SigningKey` if you configure a persistent signing key in the shell. The demonstration command enables Development and Swagger. The container defaults to Production with Swagger disabled. The Dockerfile uses a multi-stage build and a non-root runtime user.
 
 Replace the Oracle placeholders before starting. On startup, migrations and seed run against that configured schema. Open [http://localhost:8080/swagger](http://localhost:8080/swagger), execute the login request with the public Admin account listed above, and use its token in Authorize. Press Ctrl+C in the container terminal to stop; --rm removes the stopped container, while Oracle data remains on the external server.
 

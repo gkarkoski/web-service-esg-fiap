@@ -60,7 +60,13 @@ public class CollectionWorkflowTests
         var bundle = await client.GetStringAsync("/swagger/swagger-ui-bundle.js");
         Assert.DoesNotContain(@"^3\.0\.([0123])", bundle);
         var paths = json.GetProperty("paths");
-        foreach (var path in new[] { "/api/auth/login", "/api/employees", "/api/trainings", "/api/job-roles", "/api/training-records", "/api/compliance/issues" })
-            Assert.True(paths.TryGetProperty(path, out _));
+        var login = paths.GetProperty("/api/auth/login").GetProperty("post");
+        Assert.False(json.TryGetProperty("security", out _));
+        Assert.False(login.TryGetProperty("security", out _));
+        foreach (var path in new[] { "/api/employees", "/api/trainings", "/api/job-roles", "/api/training-records", "/api/compliance/issues" })
+        {
+            var security = paths.GetProperty(path).GetProperty("get").GetProperty("security");
+            Assert.True(security[0].TryGetProperty("Bearer", out _));
+        }
     }
 }

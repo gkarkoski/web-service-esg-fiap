@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EsgTrainingManagement.Tests;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory(string signingKey = "test-only-signing-key-with-at-least-32-bytes") : WebApplicationFactory<Program>
 {
     private readonly string databaseName = Guid.NewGuid().ToString();
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -18,7 +18,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Jwt:SigningKey"] = "test-only-signing-key-with-at-least-32-bytes",
+            ["Jwt:SigningKey"] = signingKey,
             ["ConnectionStrings:DefaultConnection"] = ""
         }));
         builder.ConfigureServices(services =>
