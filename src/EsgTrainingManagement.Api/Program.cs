@@ -18,8 +18,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(o => o.UseOracle(connection ?? "Data Source=not-configured;", oracle => oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
+builder.Services.AddDbContext<AppDbContext>((sp, o) => o.UseOracle(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection") ?? "Data Source=not-configured;", oracle => oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
 builder.Services.AddSingleton(sp =>
 {
     var jwt = sp.GetRequiredService<IConfiguration>().GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
@@ -62,6 +61,7 @@ app.UseAuthorization();
 app.MapControllers();
 if (!app.Environment.IsEnvironment("Testing"))
 {
+    var connection = app.Configuration.GetConnectionString("DefaultConnection");
     if (string.IsNullOrWhiteSpace(connection)) app.Logger.LogWarning("Oracle connection is not configured. Database migration and seed were not executed.");
     else
     {

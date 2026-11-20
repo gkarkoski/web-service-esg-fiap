@@ -18,7 +18,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Jwt:SigningKey"] = "test-only-signing-key-with-at-least-32-bytes"
+            ["Jwt:SigningKey"] = "test-only-signing-key-with-at-least-32-bytes",
+            ["ConnectionStrings:DefaultConnection"] = ""
         }));
         builder.ConfigureServices(services =>
         {

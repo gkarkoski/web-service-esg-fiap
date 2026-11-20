@@ -41,6 +41,17 @@ Replace Oracle placeholders locally. Keep actual credentials outside tracked fil
 
 The evaluator needs valid Oracle credentials and network access to the FIAP server. They can use their own schema with the required permissions, or receive access to the demonstration schema privately. The Oracle schema normally matches the database username. API demonstration logins do not grant direct database access. The application does not load credentials from AGENTS.md, and the delivery does not include database passwords.
 
+For repeated local execution from Rider, configure .NET user-secrets once instead of setting variables for every terminal. Secrets are stored in the current user's profile, outside the repository:
+
+```powershell
+dotnet user-secrets set 'ConnectionStrings:DefaultConnection' 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;' --project src/EsgTrainingManagement.Api
+$jwtKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+dotnet user-secrets set 'Jwt:SigningKey' $jwtKey --project src/EsgTrainingManagement.Api
+dotnet run --project src/EsgTrainingManagement.Api --launch-profile http
+```
+
+Replace placeholders locally. In Rider, select the `http` launch profile from launchSettings.json, which sets Development and port 8080. User-secrets are loaded only in Development; running the executable directly without that environment does not load them. Docker and other machines still need their own configuration. Environment variables override user-secrets when both are set.
+
 Outside Testing, a configured connection triggers MigrateAsync followed by the idempotent seed. Connection or migration errors fail startup. Without a connection, startup logs that the database was not initialized; database-backed routes require configuration. An absent or invalid signing key fails startup.
 
 Swagger is available at [http://localhost:8080/swagger](http://localhost:8080/swagger) in Development. Log in through POST /api/auth/login and enter the returned token in Authorize. Public demonstration accounts configured in appsettings.json:
