@@ -161,4 +161,4 @@ The script creates artifacts/delivery/EsgTrainingManagement.Source.zip and EsgTr
 
 ## Verification status
 
-Restore, build and automated tests passed. Oracle migrations and SQL were generated and checked without applying the schema. Docker is unavailable in the current environment. Real Oracle migration/seed execution and GUID persistence, Docker build/run, and Postman/Insomnia import/run remain unverified. Execute the database, container and collection steps above before treating the academic delivery as fully validated.
+Restore, build and automated tests passed. Oracle connection, migrations, repeated seed execution, employee and record creation, HTTP queries, RAW(16) GUID/foreign-key persistence, decimal score and calculated expiry were verified against the configured FIAP database. One verification employee and one completion record were retained with VERIFY identifiers. Credentials were loaded locally and were not committed. Docker build/run and actual Postman/Insomnia import/run remain unverified. Execute those external checks before treating the academic delivery as fully validated.
