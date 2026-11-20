@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using EsgTrainingManagement.Api.Data;
 using EsgTrainingManagement.Api.Exceptions;
 using EsgTrainingManagement.Api.Security;
+using EsgTrainingManagement.Api.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +28,7 @@ builder.Services.AddSingleton(sp =>
     return jwt;
 });
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Configure<JwtSettings>((o, jwt) =>
 {
