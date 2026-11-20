@@ -1,0 +1,329 @@
+{
+  "info": {
+    "name": "ESG Training Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run folders in order. API enum strings: EsgPillar = Environmental, Social, Governance; JobRole = Operator, PeopleAnalyst, FinanceAnalyst; Department = Operations, HumanResources, Finance; ComplianceStatus = Compliant, ExpiringSoon, Expired, WithinDeadline, Pending. Issues accept Expired, Pending, ExpiringSoon. Dates must be UTC. The default employee GUID belongs to the seed. Employee and training creation update the variables used by later requests. Re-linking an existing requirement returns 422. Demo passwords are public fixtures."
+  },
+  "auth": {
+    "bearer": [
+      {
+        "value": "{{jwt_token}}",
+        "type": "string",
+        "key": "token"
+      }
+    ],
+    "type": "bearer"
+  },
+  "variable": [
+    {
+      "value": "http://localhost:8080",
+      "key": "base_url"
+    },
+    {
+      "value": "",
+      "key": "jwt_token"
+    },
+    {
+      "value": "00000000-0000-0000-0000-000000000001",
+      "key": "employee_id"
+    },
+    {
+      "value": "1",
+      "key": "training_id"
+    },
+    {
+      "value": "1",
+      "key": "record_id"
+    },
+    {
+      "value": "API-001",
+      "key": "employee_number"
+    },
+    {
+      "value": "api.employee@example.com",
+      "key": "employee_email"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Admin login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"email\": \"admin@esg.com\",\r\n  \"password\": \"Admin@123\"\r\n}",
+              "mode": "raw"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Login returns 200\", () => pm.response.to.have.status(200));",
+                  "const jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"jwt_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Employees",
+      "item": [
+        {
+          "name": "Register employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
+            "url": "{{base_url}}/api/employees",
+            "body": {
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"employeeNumber\": \"{{employee_number}}\",\r\n  \"email\": \"{{employee_email}}\",\r\n  \"hireDate\": \"2026-01-01T00:00:00Z\",\r\n  \"jobRole\": \"Operator\",\r\n  \"name\": \"Example Employee\",\r\n  \"isActive\": true\r\n}",
+              "mode": "raw"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Employee created\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"employee_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/employees?pageNumber=1&pageSize=10&jobRoleId=1&isActive=true"
+          }
+        },
+        {
+          "name": "Get employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/employees/{{employee_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Trainings",
+      "item": [
+        {
+          "name": "Create training",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
+            "url": "{{base_url}}/api/trainings",
+            "body": {
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"validityMonths\": 12,\r\n  \"esgPillar\": \"Environmental\",\r\n  \"title\": \"Sustainability Workshop\",\r\n  \"durationHours\": 4,\r\n  \"description\": \"Practical sustainability training\"\r\n}",
+              "mode": "raw"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Training created\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"training_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List trainings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/trainings?pageNumber=1&pageSize=10&esgPillar=Environmental&title=Education"
+          }
+        },
+        {
+          "name": "Get training",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/trainings/{{training_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Training Requirements",
+      "item": [
+        {
+          "name": "List job roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/job-roles?pageNumber=1&pageSize=10"
+          }
+        },
+        {
+          "name": "Link mandatory training",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
+            "url": "{{base_url}}/api/job-roles/1/trainings/{{training_id}}",
+            "body": {
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"daysAfterHire\": 30\r\n}",
+              "mode": "raw"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Training Records",
+      "item": [
+        {
+          "name": "Record completion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
+            "url": "{{base_url}}/api/training-records",
+            "body": {
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              },
+              "raw": "{\r\n  \"score\": 9.5,\r\n  \"employeeId\": \"{{employee_id}}\",\r\n  \"trainingId\": {{training_id}},\r\n  \"completedAt\": \"2026-11-01T00:00:00Z\",\r\n  \"certificateCode\": \"DEMO-CERT-2026\"\r\n}",
+              "mode": "raw"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Record created\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"record_id\", pm.response.json().id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List training records",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/training-records?pageNumber=1&pageSize=10&employeeId={{employee_id}}&trainingId={{training_id}}"
+          }
+        },
+        {
+          "name": "Get training record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/training-records/{{record_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Compliance & ESG Indicators",
+      "item": [
+        {
+          "name": "Employee compliance dossier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/compliance/employees/{{employee_id}}"
+          }
+        },
+        {
+          "name": "List compliance issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/compliance/issues?pageNumber=1&pageSize=10"
+          }
+        },
+        {
+          "name": "Filter issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/compliance/issues?pageNumber=1&pageSize=10&status=Pending&department=Operations"
+          }
+        },
+        {
+          "name": "ESG indicators",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/compliance/esg-indicators"
+          }
+        }
+      ]
+    }
+  ]
+}
