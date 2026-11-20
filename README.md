@@ -179,17 +179,3 @@ Import collections/EsgTrainingManagement.postman_collection.json as Postman Coll
 ```
 
 This checks JSON, folders, variables and request bodies after substituting the numeric training variable. It does not perform an actual Postman/Insomnia import or collection HTTP run.
-
-## Delivery
-
-After committing the source:
-
-```powershell
-./scripts/New-DeliveryArchives.ps1
-```
-
-The script creates artifacts/delivery/EsgTrainingManagement.Source.zip and EsgTrainingManagement.Collection.zip. It packages tracked files, excludes generated output, IDE/local configuration, instruction files, secrets and ZIPs, verifies required files/migrations, and lists both archives' contents. ZIPs are ignored by Git. Tracked configuration must contain placeholders and public demo fixtures only.
-
-## Verification status
-
-Restore, build and automated tests passed. Oracle connection, migrations, repeated seed execution, employee and record creation, HTTP queries, RAW(16) GUID/foreign-key persistence, decimal score and calculated expiry were verified against the configured FIAP database. One verification employee and one completion record were retained with VERIFY identifiers. Credentials were loaded locally and were not committed. Swagger UI, OpenAPI JSON and login returned HTTP 200 in Docker Desktop using the existing image in Development. A Docker build from the current source, Oracle access from the container, and actual Postman or Insomnia import and execution remain unverified.
