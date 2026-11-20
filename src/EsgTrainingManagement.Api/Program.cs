@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
 using EsgTrainingManagement.Api.Data;
@@ -22,9 +23,11 @@ builder.Services.AddDbContext<AppDbContext>((sp, o) => o.UseOracle(sp.GetRequire
 builder.Services.AddSingleton(sp =>
 {
     var jwt = sp.GetRequiredService<IConfiguration>().GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
-    if (Encoding.UTF8.GetByteCount(jwt.SigningKey) < 32 || jwt.ExpirationMinutes <= 0)
-        throw new InvalidOperationException("Configure Jwt:SigningKey with at least 32 bytes and a positive expiration.");
-    return jwt;
+    if (string.IsNullOrWhiteSpace(jwt.SigningKey))
+        jwt.SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+    if (Encoding.UTF8.GetByteCount(jwt.SigningKey) < 32)
+        throw new InvalidOperationException("Jwt:SigningKey must have at least 32 bytes when configured.");
+    return jwt.ExpirationMinutes <= 0 ? throw new InvalidOperationException("Jwt:ExpirationMinutes must be positive.") : jwt;
 });
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
@@ -49,7 +52,7 @@ builder.Services.AddSwaggerGen(o =>
 {
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "ESG Training Management API", Version = "v1" });
     o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Type = SecuritySchemeType.Http, Scheme = "bearer", BearerFormat = "JWT" });
-    o.AddSecurityRequirement(new OpenApiSecurityRequirement { [new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }] = [] });
+    o.OperationFilter<BearerSecurityOperationFilter>();
 });
 var app = builder.Build();
 app.Services.GetRequiredService<JwtSettings>();
