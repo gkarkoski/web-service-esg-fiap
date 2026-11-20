@@ -28,6 +28,7 @@ builder.Services.AddSingleton(sp =>
     return jwt;
 });
 builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<TrainingService>();
 builder.Services.AddScoped<RequirementService>();
