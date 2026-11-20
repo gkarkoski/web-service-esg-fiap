@@ -21,6 +21,8 @@ Dockerfile
 
 ## Configuration and execution
 
+The command examples use PowerShell 7 (`pwsh`). Choose either local .NET execution below or Docker execution in the Docker section; the Docker option does not require a local .NET SDK.
+
 Install the .NET 8 SDK, including the ASP.NET Core 8 runtime. A newer SDK can build net8.0, but API execution and HTTP tests still need ASP.NET Core 8. Oracle SQL generation targets Oracle 19 compatibility, with NUMBER(1) booleans. Use Oracle 19c or newer and permissions to create tables, indexes, constraints and identity columns.
 
 Supply Oracle credentials and the JWT key through environment variables. appsettings.Example.json contains placeholders only. PowerShell example:
@@ -36,6 +38,8 @@ dotnet run --project src/EsgTrainingManagement.Api -- --urls http://localhost:80
 ```
 
 Replace Oracle placeholders locally. Keep actual credentials outside tracked files and ZIPs. The JWT key requires at least 32 bytes; tokens expire after 60 minutes. Issuer and audience default to EsgTrainingManagement. Changing the key invalidates previous tokens.
+
+The evaluator needs valid Oracle credentials and network access to the FIAP server. They can use their own schema with the required permissions, or receive access to the demonstration schema privately. The Oracle schema normally matches the database username. API demonstration logins do not grant direct database access. The application does not load credentials from AGENTS.md, and the delivery does not include database passwords.
 
 Outside Testing, a configured connection triggers MigrateAsync followed by the idempotent seed. Connection or migration errors fail startup. Without a connection, startup logs that the database was not initialized; database-backed routes require configuration. An absent or invalid signing key fails startup.
 
@@ -132,12 +136,28 @@ HTTP integration tests use WebApplicationFactory, Testing, unique InMemory datab
 
 ## Docker
 
+Prerequisites:
+
+- Install and start Docker Desktop or another Docker engine configured for Linux containers.
+- Extract the source ZIP and open PowerShell 7 in the directory containing Dockerfile.
+- Allow internet access for the initial .NET image and NuGet downloads.
+- Have valid Oracle credentials and network access to oracle.fiap.com.br:1521 from the container, including any institution-required VPN.
+- Keep host port 8080 available. No local .NET SDK or Oracle installation is required for this option.
+
+Configure the environment in that same terminal, build the image, and start the API:
+
 ```powershell
+$env:ConnectionStrings__DefaultConnection = 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;'
+$env:Jwt__SigningKey = [Convert]::ToBase64String([System.Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
 docker build -t esg-training-management .
 docker run --rm -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development -e ConnectionStrings__DefaultConnection -e Jwt__SigningKey esg-training-management
 ```
 
 Set the two environment variables in the shell first. The container connects to an external Oracle server. Development is selected only in the local demonstration command; the container defaults to Production with Swagger disabled. The Dockerfile uses a multi-stage build and a non-root runtime user.
+
+Replace the Oracle placeholders before starting. On startup, migrations and seed run against that configured schema. Open [http://localhost:8080/swagger](http://localhost:8080/swagger), execute the login request with the public Admin account listed above, and use its token in Authorize. Press Ctrl+C in the container terminal to stop; --rm removes the stopped container, while Oracle data remains on the external server.
+
+If Docker reports that it cannot connect to its daemon, start the Docker engine. If port 8080 is occupied, use `-p 8081:8080` and access Swagger on host port 8081. Oracle login, connectivity or permission errors must be resolved in the connection/schema configuration; they fail API startup rather than silently initializing an empty database.
 
 ## Postman and Insomnia
 
