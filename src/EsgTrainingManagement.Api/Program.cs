@@ -31,6 +31,7 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<TrainingService>();
 builder.Services.AddScoped<RequirementService>();
+builder.Services.AddScoped<TrainingRecordService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Configure<JwtSettings>((o, jwt) =>
 {
