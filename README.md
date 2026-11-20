@@ -144,12 +144,12 @@ HTTP integration tests use WebApplicationFactory, Testing, unique InMemory datab
 
 ## Docker
 
-Prerequisites:
+Prerequisites
 
 - Install and start Docker Desktop or another Docker engine configured for Linux containers.
 - Extract the source ZIP and open PowerShell 7 in the directory containing Dockerfile.
 - Allow internet access for the initial .NET image and NuGet downloads.
-- Have valid Oracle credentials and network access to oracle.fiap.com.br:1521 from the container, including any institution-required VPN.
+- To use endpoints that read or write data, have valid Oracle credentials and network access from the container to oracle.fiap.com.br:1521, including any institution-required VPN.
 - Keep host port 8080 available. No local .NET SDK or Oracle installation is required for this option.
 
 Configure the environment in that same terminal, build the image, and start the API.
@@ -157,14 +157,18 @@ Configure the environment in that same terminal, build the image, and start the 
 ```powershell
 $env:ConnectionStrings__DefaultConnection = 'Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;'
 docker build -t esg-training-management .
-docker run --rm -p 8080:8080 -e ASPNETCORE_ENVIRONMENT=Development -e ConnectionStrings__DefaultConnection esg-training-management
+docker run --rm -p 127.0.0.1:8080:8080 -e ASPNETCORE_ENVIRONMENT=Development -e ConnectionStrings__DefaultConnection esg-training-management
 ```
 
-The container connects to an external Oracle server using the connection string from the shell. Pass `-e Jwt__SigningKey` if you configure a persistent signing key in the shell. The demonstration command enables Development and Swagger. The container defaults to Production with Swagger disabled. The Dockerfile uses a multi-stage build and a non-root runtime user.
+The Dockerfile uses a multi-stage build and a non-root runtime user. The API listens on port 8080 inside the container. The command publishes it on port 8080 on your machine. To use another host port, for example 8081, use `-p 127.0.0.1:8081:8080` and update the browser URL and Postman `base_url`. [Docker port publishing](https://docs.docker.com/engine/network/port-publishing/)
 
-Replace the Oracle placeholders before starting. On startup, migrations and seed run against that configured schema. Open [http://localhost:8080/swagger](http://localhost:8080/swagger), execute the login request with the public Admin account listed above, and use its token in Authorize. Press Ctrl+C in the container terminal to stop; --rm removes the stopped container, while Oracle data remains on the external server.
+Development enables Swagger for the local demonstration. The default environment is Production, where Swagger is disabled. For a quick check of Swagger and login without Oracle, omit `-e ConnectionStrings__DefaultConnection`. For database operations, replace the Oracle placeholders in your shell. On startup, migrations and seed run against that configured schema. Pass `-e Jwt__SigningKey` if you configure a persistent signing key in the shell.
 
-If Docker reports that it cannot connect to its daemon, start the Docker engine. If port 8080 is occupied, use `-p 8081:8080` and access Swagger on host port 8081. Oracle login, connectivity or permission errors must be resolved in the connection/schema configuration; they fail API startup rather than silently initializing an empty database.
+In **Docker Desktop**, go to **Images → Run → Optional settings**. Enter host port `8080` in the row for container port `8080/tcp`. Add `ASPNETCORE_ENVIRONMENT` with value `Development` and, for database operations, add `ConnectionStrings__DefaultConnection` with your Oracle connection string. [Run an image from Docker Desktop](https://docs.docker.com/desktop/use-desktop/images/#run-an-image-as-a-container)
+
+Open [http://127.0.0.1:8080/swagger](http://127.0.0.1:8080/swagger), run the login request with the demo Admin account and enter its token under **Authorize**. If Swagger shows `Failed to fetch`, open [the OpenAPI JSON directly](http://127.0.0.1:8080/swagger/v1/swagger.json). It should return HTTP 200. Check `docker ps` for a mapping to container port `8080/tcp` and `docker logs <container>` for `Hosting environment: Development`. If Docker cannot connect to its daemon, start Docker Desktop or your Docker engine. Oracle connection or migration errors appear in the container logs and stop startup.
+
+Press Ctrl+C in the terminal running `docker run` to stop the container. The `--rm` flag removes the stopped container. Oracle data stays on the external server.
 
 ## Postman and Insomnia
 
@@ -188,4 +192,4 @@ The script creates artifacts/delivery/EsgTrainingManagement.Source.zip and EsgTr
 
 ## Verification status
 
-Restore, build and automated tests passed. Oracle connection, migrations, repeated seed execution, employee and record creation, HTTP queries, RAW(16) GUID/foreign-key persistence, decimal score and calculated expiry were verified against the configured FIAP database. One verification employee and one completion record were retained with VERIFY identifiers. Credentials were loaded locally and were not committed. Docker build/run and actual Postman/Insomnia import/run remain unverified. Execute those external checks before treating the academic delivery as fully validated.
+Restore, build and automated tests passed. Oracle connection, migrations, repeated seed execution, employee and record creation, HTTP queries, RAW(16) GUID/foreign-key persistence, decimal score and calculated expiry were verified against the configured FIAP database. One verification employee and one completion record were retained with VERIFY identifiers. Credentials were loaded locally and were not committed. Swagger UI, OpenAPI JSON and login returned HTTP 200 in Docker Desktop using the existing image in Development. A Docker build from the current source, Oracle access from the container, and actual Postman or Insomnia import and execution remain unverified.
