@@ -58,7 +58,7 @@ app.UseStatusCodePages();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(o => o.SwaggerEndpoint("v1/swagger.json", "ESG Training Management API v1"));
+    app.UseSwaggerUI(o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "ESG Training Management API v1"));
 }
 app.UseAuthentication();
 app.UseAuthorization();
