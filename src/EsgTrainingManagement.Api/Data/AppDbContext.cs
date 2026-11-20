@@ -30,7 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.EmployeeNumber).HasMaxLength(30).IsUnicode(false);
             e.Property(x => x.Email).HasMaxLength(150).IsUnicode(false);
             e.Property(x => x.HireDate).HasConversion(utc);
-            e.Property(x => x.IsActive).HasConversion<int>().HasColumnType("NUMBER(1)");
+            e.Property(x => x.IsActive).HasColumnType("NUMBER(1)");
             e.HasIndex(x => x.EmployeeNumber).IsUnique();
             e.HasIndex(x => x.Email).IsUnique();
             e.HasIndex(x => new { x.IsActive, x.JobRoleId });
@@ -46,7 +46,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         model.Entity<TrainingRequirement>(e =>
         {
             e.HasKey(x => new { x.JobRoleId, x.TrainingId });
-            e.Property(x => x.IsMandatory).HasConversion<int>().HasColumnType("NUMBER(1)");
+            e.Property(x => x.IsMandatory).HasColumnType("NUMBER(1)");
             e.HasOne(x => x.JobRole).WithMany(x => x.TrainingRequirements).HasForeignKey(x => x.JobRoleId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Training).WithMany().HasForeignKey(x => x.TrainingId).OnDelete(DeleteBehavior.Restrict);
         });

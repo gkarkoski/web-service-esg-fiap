@@ -42,7 +42,7 @@ namespace EsgTrainingManagement.Api.Data.Migrations
                     b.Property<DateTime>("HireDate")
                         .HasColumnType("TIMESTAMP(7)");
 
-                    b.Property<int>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("NUMBER(1)");
 
                     b.Property<int>("JobRoleId")
@@ -182,7 +182,7 @@ namespace EsgTrainingManagement.Api.Data.Migrations
                     b.Property<int>("DaysAfterHire")
                         .HasColumnType("NUMBER(10)");
 
-                    b.Property<int>("IsMandatory")
+                    b.Property<bool>("IsMandatory")
                         .HasColumnType("NUMBER(1)");
 
                     b.HasKey("JobRoleId", "TrainingId");

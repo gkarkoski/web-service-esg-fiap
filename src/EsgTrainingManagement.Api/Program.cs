@@ -19,7 +19,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(o => o.UseOracle(connection ?? "Data Source=not-configured;"));
+builder.Services.AddDbContext<AppDbContext>(o => o.UseOracle(connection ?? "Data Source=not-configured;", oracle => oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
 builder.Services.AddSingleton(sp =>
 {
     var jwt = sp.GetRequiredService<IConfiguration>().GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
@@ -32,6 +32,7 @@ builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<TrainingService>();
 builder.Services.AddScoped<RequirementService>();
 builder.Services.AddScoped<TrainingRecordService>();
+builder.Services.AddScoped<ComplianceService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme).Configure<JwtSettings>((o, jwt) =>
 {

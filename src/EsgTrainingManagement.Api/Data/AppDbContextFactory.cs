@@ -9,6 +9,6 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         var connection = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
             ?? "Data Source=oracle.fiap.com.br:1521/ORCL;User Id=SEU_RM;Password=SUA_SENHA;";
-        return new AppDbContext(new DbContextOptionsBuilder<AppDbContext>().UseOracle(connection).Options);
+        return new AppDbContext(new DbContextOptionsBuilder<AppDbContext>().UseOracle(connection, o => o.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)).Options);
     }
 }
