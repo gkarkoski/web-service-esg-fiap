@@ -17,6 +17,7 @@ Date: 2026-11-20
 | Collection | Valid JSON, six folders, sixteen requests, empty exported token |
 | Collection request sequence | All sixteen requests executed successfully against the InMemory HTTP test host |
 | Swagger | Development OpenAPI document generated and all six controllers verified |
+| Swagger UI compatibility | Updated Swashbuckle to 9.0.6; verified actual browser rendering of all six controllers with OpenAPI 3.0.4. The previous UI rejected versions above 3.0.3. |
 | Dependency audit | No known vulnerable direct or transitive packages reported by the configured NuGet source after updating Pkcs to 8.0.2 |
 | Source formatting check | git diff --check passed |
 | Delivery archives | Separate source and collection ZIPs generated; content listings written and required files checked |

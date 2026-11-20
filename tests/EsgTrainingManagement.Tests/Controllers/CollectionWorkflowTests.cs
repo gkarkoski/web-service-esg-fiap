@@ -57,6 +57,8 @@ public class CollectionWorkflowTests
         Assert.Matches(@"^3\.\d+\.\d+$", json.GetProperty("openapi").GetString()!);
         var ui = await client.GetStringAsync("/swagger/index.js");
         Assert.Contains("v1/swagger.json", ui);
+        var bundle = await client.GetStringAsync("/swagger/swagger-ui-bundle.js");
+        Assert.DoesNotContain(@"^3\.0\.([0123])", bundle);
         var paths = json.GetProperty("paths");
         foreach (var path in new[] { "/api/auth/login", "/api/employees", "/api/trainings", "/api/job-roles", "/api/training-records", "/api/compliance/issues" })
             Assert.True(paths.TryGetProperty(path, out _));
