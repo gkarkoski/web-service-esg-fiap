@@ -9,7 +9,8 @@ namespace EsgTrainingManagement.Api.Controllers;
 public class TrainingsController(TrainingService service) : ControllerBase
 {
     [HttpGet]
-    public Task<PagedResponse<TrainingResponse>> List([FromQuery] TrainingQuery query, CancellationToken ct) => service.ListAsync(query, ct);
+    public Task<PagedResponse<TrainingResponse>> List([FromQuery] TrainingQuery query, CancellationToken ct) =>
+        service.ListAsync(query, ct);
 
     [HttpGet("{trainingId:int}")]
     public Task<TrainingResponse> Get(int trainingId, CancellationToken ct) => service.GetAsync(trainingId, ct);

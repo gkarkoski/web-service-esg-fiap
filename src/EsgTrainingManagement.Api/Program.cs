@@ -13,13 +13,18 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+builder.Services.AddControllers().AddJsonOptions(o =>
+    o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddDbContext<AppDbContext>((sp, o) => o.UseOracle(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection") ?? "Data Source=not-configured;", oracle => oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
+builder.Services.AddDbContext<AppDbContext>((sp, o) =>
+    o.UseOracle(
+        sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection") ??
+        "Data Source=not-configured;",
+        oracle => oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19)));
 builder.Services.AddSingleton(sp =>
 {
     var jwt = sp.GetRequiredService<IConfiguration>().GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
@@ -27,7 +32,9 @@ builder.Services.AddSingleton(sp =>
         jwt.SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     if (Encoding.UTF8.GetByteCount(jwt.SigningKey) < 32)
         throw new InvalidOperationException("Jwt:SigningKey must have at least 32 bytes when configured.");
-    return jwt.ExpirationMinutes <= 0 ? throw new InvalidOperationException("Jwt:ExpirationMinutes must be positive.") : jwt;
+    return jwt.ExpirationMinutes <= 0
+        ? throw new InvalidOperationException("Jwt:ExpirationMinutes must be positive.")
+        : jwt;
 });
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
@@ -51,7 +58,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
 {
     o.SwaggerDoc("v1", new OpenApiInfo { Title = "ESG Training Management API", Version = "v1" });
-    o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Type = SecuritySchemeType.Http, Scheme = "bearer", BearerFormat = "JWT" });
+    o.AddSecurityDefinition("Bearer",
+        new OpenApiSecurityScheme { Type = SecuritySchemeType.Http, Scheme = "bearer", BearerFormat = "JWT" });
     o.OperationFilter<BearerSecurityOperationFilter>();
 });
 var app = builder.Build();
@@ -63,13 +71,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(o => o.SwaggerEndpoint("/swagger/v1/swagger.json", "ESG Training Management API v1"));
 }
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 if (!app.Environment.IsEnvironment("Testing"))
 {
     var connection = app.Configuration.GetConnectionString("DefaultConnection");
-    if (string.IsNullOrWhiteSpace(connection)) app.Logger.LogWarning("Oracle connection is not configured. Database migration and seed were not executed.");
+    if (string.IsNullOrWhiteSpace(connection))
+        app.Logger.LogWarning("Oracle connection is not configured. Database migration and seed were not executed.");
     else
     {
         await using var scope = app.Services.CreateAsyncScope();
@@ -78,5 +88,7 @@ if (!app.Environment.IsEnvironment("Testing"))
         await DbSeeder.SeedAsync(db, scope.ServiceProvider.GetRequiredService<TimeProvider>());
     }
 }
+
 app.Run();
+
 public partial class Program;

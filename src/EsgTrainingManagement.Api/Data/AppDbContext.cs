@@ -14,7 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder model)
     {
-        var utc = new ValueConverter<DateTime, DateTime>(v => v.ToUniversalTime(), v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+        var utc = new ValueConverter<DateTime, DateTime>(v => v.ToUniversalTime(),
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
         model.Entity<JobRole>(e =>
         {
             e.Property(x => x.Id).ValueGeneratedNever();
@@ -47,7 +48,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             e.HasKey(x => new { x.JobRoleId, x.TrainingId });
             e.Property(x => x.IsMandatory).HasColumnType("NUMBER(1)");
-            e.HasOne(x => x.JobRole).WithMany(x => x.TrainingRequirements).HasForeignKey(x => x.JobRoleId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.JobRole).WithMany(x => x.TrainingRequirements).HasForeignKey(x => x.JobRoleId)
+                .OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.Training).WithMany().HasForeignKey(x => x.TrainingId).OnDelete(DeleteBehavior.Restrict);
         });
         model.Entity<TrainingRecord>(e =>

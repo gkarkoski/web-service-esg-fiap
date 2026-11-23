@@ -9,7 +9,8 @@ namespace EsgTrainingManagement.Api.Controllers;
 public class EmployeesController(EmployeeService service) : ControllerBase
 {
     [HttpGet]
-    public Task<PagedResponse<EmployeeResponse>> List([FromQuery] EmployeeQuery query, CancellationToken ct) => service.ListAsync(query, ct);
+    public Task<PagedResponse<EmployeeResponse>> List([FromQuery] EmployeeQuery query, CancellationToken ct) =>
+        service.ListAsync(query, ct);
 
     [HttpGet("{employeeId:guid}")]
     public Task<EmployeeResponse> Get(Guid employeeId, CancellationToken ct) => service.GetAsync(employeeId, ct);

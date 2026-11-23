@@ -18,8 +18,18 @@ public class ComplianceRow
 }
 
 public record AdherenceSummary(int CompliantObligations, int DueObligations, decimal AdherencePercentage);
-public record EmployeeComplianceResponse(EmployeeResponse Employee, IReadOnlyList<ComplianceRow> MandatoryTrainings, AdherenceSummary Summary);
-public record EsgIndicatorResponse(EsgPillar EsgPillar, int CompliantObligations, int DueObligations, decimal AdherencePercentage);
+
+public record EmployeeComplianceResponse(
+    EmployeeResponse Employee,
+    IReadOnlyList<ComplianceRow> MandatoryTrainings,
+    AdherenceSummary Summary);
+
+public record EsgIndicatorResponse(
+    EsgPillar EsgPillar,
+    int CompliantObligations,
+    int DueObligations,
+    decimal AdherencePercentage);
+
 public class ComplianceQuery : PaginationParams
 {
     public ComplianceStatus? Status { get; set; }
