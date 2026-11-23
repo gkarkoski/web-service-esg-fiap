@@ -29,8 +29,13 @@ public class JwtTokenService(JwtSettings settings, TimeProvider clock)
         var now = clock.GetUtcNow().UtcDateTime;
         var expires = now.AddMinutes(settings.ExpirationMinutes);
         var token = new JwtSecurityToken(settings.Issuer, settings.Audience,
-            [new Claim(JwtRegisteredClaimNames.Sub, user.Email), new Claim(ClaimTypes.Role, user.Role), new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())],
-            now, expires, new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey)), SecurityAlgorithms.HmacSha256));
+            [
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email), new Claim(ClaimTypes.Role, user.Role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ],
+            now, expires,
+            new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey)),
+                SecurityAlgorithms.HmacSha256));
         return new TokenResponse(new JwtSecurityTokenHandler().WriteToken(token), expires);
     }
 }

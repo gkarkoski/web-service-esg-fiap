@@ -15,7 +15,8 @@ public record PagedResponse<T>(IReadOnlyList<T> Items, int PageNumber, int PageS
 
 public static class PaginationExtensions
 {
-    public static async Task<PagedResponse<T>> ToPageAsync<T>(this IQueryable<T> query, PaginationParams page, CancellationToken ct)
+    public static async Task<PagedResponse<T>> ToPageAsync<T>(this IQueryable<T> query, PaginationParams page,
+        CancellationToken ct)
     {
         var count = await query.CountAsync(ct);
         var items = await query.Skip((page.PageNumber - 1) * page.PageSize).Take(page.PageSize).ToListAsync(ct);

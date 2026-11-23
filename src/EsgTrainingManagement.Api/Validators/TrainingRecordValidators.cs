@@ -9,7 +9,9 @@ public class CreateTrainingRecordValidator : AbstractValidator<CreateTrainingRec
     {
         RuleFor(x => x.EmployeeId).NotEmpty();
         RuleFor(x => x.TrainingId).GreaterThan(0);
-        RuleFor(x => x.CompletedAt).Must(x => x.Kind == DateTimeKind.Utc && x > DateTime.MinValue && x <= clock.GetUtcNow().UtcDateTime).WithMessage("Completion must be a nonfuture UTC timestamp.");
+        RuleFor(x => x.CompletedAt)
+            .Must(x => x.Kind == DateTimeKind.Utc && x > DateTime.MinValue && x <= clock.GetUtcNow().UtcDateTime)
+            .WithMessage("Completion must be a nonfuture UTC timestamp.");
         RuleFor(x => x.Score).InclusiveBetween(0, 10).PrecisionScale(5, 2, true);
         RuleFor(x => x.CertificateCode).NotEmpty().MaximumLength(60);
     }

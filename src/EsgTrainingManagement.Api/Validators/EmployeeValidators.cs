@@ -15,7 +15,8 @@ public class PaginationValidator<T> : AbstractValidator<T> where T : PaginationP
 
 public class EmployeeQueryValidator : PaginationValidator<EmployeeQuery>
 {
-    public EmployeeQueryValidator() => RuleFor(x => x.JobRoleId).Must(x => x is null || Enum.IsDefined((JobRoleType)x.Value)).WithMessage("Unknown job role.");
+    public EmployeeQueryValidator() => RuleFor(x => x.JobRoleId)
+        .Must(x => x is null || Enum.IsDefined((JobRoleType)x.Value)).WithMessage("Unknown job role.");
 }
 
 public class CreateEmployeeValidator : AbstractValidator<CreateEmployeeRequest>
@@ -26,6 +27,8 @@ public class CreateEmployeeValidator : AbstractValidator<CreateEmployeeRequest>
         RuleFor(x => x.EmployeeNumber).NotEmpty().MaximumLength(30);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(150);
         RuleFor(x => x.JobRole).IsInEnum();
-        RuleFor(x => x.HireDate).Must(x => x.Kind == DateTimeKind.Utc && x <= clock.GetUtcNow().UtcDateTime && x > DateTime.MinValue).WithMessage("Hire date must be a nonfuture UTC timestamp.");
+        RuleFor(x => x.HireDate)
+            .Must(x => x.Kind == DateTimeKind.Utc && x <= clock.GetUtcNow().UtcDateTime && x > DateTime.MinValue)
+            .WithMessage("Hire date must be a nonfuture UTC timestamp.");
     }
 }
