@@ -4,7 +4,7 @@ ASP.NET Core 8 REST API for mandatory corporate training, certification expiry, 
 
 ## Architecture
 
-MVC is adapted to a Web API, as agreed with the course professor: Models represent the domain, Controllers handle HTTP, DTOs define API contracts, Services implement business rules, and EF Core handles persistence. There is no frontend or Razor view; DTOs are not views. All code and API names use English. The original solution filename is retained for Rider compatibility.
+The REST API applies ASP.NET Core MVC through controllers that handle HTTP requests and return JSON responses. Models represent the domain, request and response DTOs define the API contracts, services implement business rules, and EF Core handles persistence.
 
 ```text
 web-service-esg-fiap.sln
@@ -38,7 +38,7 @@ dotnet run --project src/EsgTrainingManagement.Api -- --urls http://localhost:80
 
 Replace Oracle placeholders locally. Keep actual credentials outside tracked files and ZIPs. The API starts with a random in-memory JWT signing key when `Jwt:SigningKey` is empty or omitted. Sign in again after restarting the API. To keep tokens valid across restarts or instances, configure the same private key of at least 32 bytes through `Jwt__SigningKey` or user-secrets. The default token lifetime configured in appsettings.json is 180 minutes.
 
-The evaluator needs valid Oracle credentials and network access to the FIAP server. They can use their own schema with the required permissions, or receive access to the demonstration schema privately. The Oracle schema normally matches the database username. API demonstration logins do not grant direct database access. The application does not load credentials from AGENTS.md, and the delivery does not include database passwords.
+Database-backed endpoints require network access to the Oracle server and credentials for a schema with the permissions listed above. The Oracle username typically identifies the schema. The demo accounts authenticate requests to the API.
 
 For repeated local execution from Rider, configure .NET user-secrets once instead of setting variables for every terminal. Secrets are stored in the current user's profile, outside the repository:
 
@@ -192,4 +192,4 @@ The script creates artifacts/delivery/EsgTrainingManagement.Source.zip and EsgTr
 
 ## Verification status
 
-Restore, build and automated tests passed. Oracle connection, migrations, repeated seed execution, employee and record creation, HTTP queries, RAW(16) GUID/foreign-key persistence, decimal score and calculated expiry were verified against the configured FIAP database. One verification employee and one completion record were retained with VERIFY identifiers. Credentials were loaded locally and were not committed. Swagger UI, OpenAPI JSON and login returned HTTP 200 in Docker Desktop using the existing image in Development. A Docker build from the current source, Oracle access from the container, and actual Postman or Insomnia import and execution remain unverified.
+Restore, build and automated tests passed. Tests against FIAP Oracle verified the connection, migrations, repeated seed execution, employee and record creation, HTTP queries, GUID persistence in RAW(16) primary and foreign keys, decimal scores, and calculated expiry. Swagger UI, OpenAPI JSON and login returned HTTP 200 using an existing Docker image in Development. A Docker build from the current source, Oracle access from the container, and collection import and execution in Postman or Insomnia remain unverified.
